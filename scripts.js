@@ -6,34 +6,30 @@ d3.csv("cars2017.csv").then(function(data) {
         d.EngineCylinders = +d.EngineCylinders;
     });
 
-    // Initial scene (Overview)
+    // Initial scene (City vs Highway MPG)
     console.log("Creating initial scene...");
-    createOverviewScene(data);
+    createScatterPlotScene(data);
 
     // Event listeners for buttons
     console.log("Adding event listeners...");
-    d3.select("#overview-btn").on("click", () => {
-        console.log("Overview button clicked");
-        createOverviewScene(data);
-    });
     d3.select("#mpg-scatter-btn").on("click", () => {
         console.log("MPG scatter button clicked");
         createScatterPlotScene(data);
     });
-    d3.select("#cylinders-mpg-btn").on("click", () => {
-        console.log("Cylinders MPG button clicked");
-        createEngineCylindersScene(data);
-        d3.select("#cylinders-mpg-controls").style("display", "block");
+    d3.select("#make-mpg-btn").on("click", () => {
+        console.log("Make MPG button clicked");
+        createMakeMPGScene(data);
+        d3.select("#make-mpg-controls").style("display", "block");
     });
     d3.select("#fuel-mpg-btn").on("click", () => {
         console.log("Fuel MPG button clicked");
         createFuelTypeScene(data);
         d3.select("#fuel-mpg-controls").style("display", "block");
     });
-    d3.select("#make-mpg-btn").on("click", () => {
-        console.log("Make MPG button clicked");
-        createMakeMPGScene(data);
-        d3.select("#make-mpg-controls").style("display", "block");
+    d3.select("#cylinders-mpg-btn").on("click", () => {
+        console.log("Cylinders MPG button clicked");
+        createEngineCylindersScene(data);
+        d3.select("#cylinders-mpg-controls").style("display", "block");
     });
 
     d3.select("#mpg-type-select").on("change", function() {
@@ -54,10 +50,6 @@ d3.csv("cars2017.csv").then(function(data) {
         updateMakeMPGScene(data, selected);
     });
 });
-
-function createOverviewScene(data) {
-    createScatterPlotScene(data);
-}
 
 function createScatterPlotScene(data) {
     console.log("Creating scatter plot scene...");
@@ -96,7 +88,7 @@ function createScatterPlotScene(data) {
         .attr("cx", d => x(d.AverageCityMPG))
         .attr("cy", d => y(d.AverageHighwayMPG))
         .attr("r", d => 2 + d.EngineCylinders)
-        .attr("fill", "blue")
+        .attr("fill", "lightblue")
         .on("mouseover", function(event, d) {
             tooltip.transition()
                 .duration(200)
@@ -120,11 +112,24 @@ function createScatterPlotScene(data) {
 
     svg.append("g")
         .attr("transform", "translate(0, 550)")
-        .call(xAxis);
+        .call(xAxis)
+        .append("text")
+        .attr("x", 400)
+        .attr("y", 40)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("City MPG");
 
     svg.append("g")
         .attr("transform", "translate(50, 0)")
-        .call(yAxis);
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -275)
+        .attr("y", -40)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("Highway MPG");
 
     svg.append("text")
         .attr("x", 400)
@@ -153,20 +158,21 @@ function createScatterPlotScene(data) {
         .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
 
     svg.append("text")
-        .attr("x", 760)
-        .attr("y", 70)
-        .attr("text-anchor", "start")
+        .attr("x", 650)
+        .attr("y", 270)
+        .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("Fuel Efficient Cars");
 
     svg.append("text")
-        .attr("x", 760)
-        .attr("y", 90)
-        .attr("text-anchor", "start")
+        .attr("x", 650)
+        .attr("y", 290)
+        .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .text("These cars have both high city and highway MPG.");
 }
+
 
 function createEngineCylindersScene(data) {
     console.log("Creating engine cylinders scene...");
@@ -192,7 +198,8 @@ function createEngineCylindersScene(data) {
         .append("circle")
         .attr("cx", d => x(d.EngineCylinders))
         .attr("cy", d => y(d.AverageCityMPG))
-        .attr("r", 5);
+        .attr("r", 5)
+        .attr("fill", "lightblue");
 
     const xAxis = d3.axisBottom(x);
     const yAxis = d3.axisLeft(y);
@@ -267,7 +274,7 @@ function createFuelTypeScene(data) {
         .attr("y", d => y(d.AverageCityMPG))
         .attr("width", x.bandwidth())
         .attr("height", d => 550 - y(d.AverageCityMPG))
-        .attr("fill", "steelblue");
+        .attr("fill", "lightblue");
 
     const xAxis = d3.axisBottom(x);
     const yAxis = d3.axisLeft(y);
@@ -340,20 +347,23 @@ function createMakeMPGScene(data) {
         .domain([0, d3.max(data, d => d.AverageCityMPG)])
         .range([550, 50]);
 
+    const sortedData = data.sort((a, b) => a.AverageCityMPG - b.AverageCityMPG);
+
     svg.selectAll("rect")
-        .data(data)
+        .data(sortedData)
         .enter()
         .append("rect")
         .attr("x", d => x(d.Make))
         .attr("y", d => y(d.AverageCityMPG))
         .attr("width", x.bandwidth())
         .attr("height", d => 550 - y(d.AverageCityMPG))
-        .attr("fill", "steelblue");
+        .attr("fill", "lightblue");
 
     const xAxis = d3.axisBottom(x);
     const yAxis = d3.axisLeft(y);
 
     svg.append("g")
+        .attr("class", "x-axis")
         .attr("transform", "translate(0, 550)")
         .call(xAxis)
         .selectAll("text")
@@ -379,20 +389,29 @@ function createMakeMPGScene(data) {
     });
 }
 
-
 function updateMakeMPGScene(data, selected) {
     console.log("Updating make MPG scene...");
     const svg = d3.select("#viz svg");
 
+    const sortedData = data.sort((a, b) => (selected === "city" ? a.AverageCityMPG - b.AverageCityMPG : a.AverageHighwayMPG - b.AverageHighwayMPG));
+
     const y = d3.scaleLinear()
-        .domain([0, d3.max(data, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)])
+        .domain([0, d3.max(sortedData, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)])
         .range([550, 50]);
 
+    const x = d3.scaleBand()
+        .domain(sortedData.map(d => d.Make))
+        .range([50, 750])
+        .padding(0.1);
+
     const yAxis = d3.axisLeft(y);
+    const xAxis = d3.axisBottom(x);
 
     svg.selectAll("rect")
+        .data(sortedData)
         .transition()
         .duration(500)
+        .attr("x", d => x(d.Make))
         .attr("y", d => y(selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG))
         .attr("height", d => 550 - y(selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG));
 
@@ -400,6 +419,14 @@ function updateMakeMPGScene(data, selected) {
         .transition()
         .duration(500)
         .call(yAxis);
+
+    svg.select("g.x-axis")
+        .transition()
+        .duration(500)
+        .call(xAxis)
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
 
     svg.select("text.title")
         .text(`Make vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);

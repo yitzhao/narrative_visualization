@@ -11,13 +11,15 @@
 <body>
     <div id="container">
         <h1>Car Purchase Recommendations</h1>
+        <div id="description">
+            <p>This dashboard recommends fuel-efficient cars to users. The first scene provides a general understanding of which cars are efficient. Users can select from three sub-scenes to further explore car types of interest in dimensions of car makes, fuel types, and the number of cylinders.</p>
+        </div>
         <div id="viz"></div>
         <div id="controls">
-            <button id="overview-btn">Overview</button>
             <button id="mpg-scatter-btn">City vs Highway MPG</button>
-            <button id="cylinders-mpg-btn">Cylinders vs MPG</button>
-            <button id="fuel-mpg-btn">Fuel Type vs MPG</button>
             <button id="make-mpg-btn">Make vs MPG</button>
+            <button id="fuel-mpg-btn">Fuel Type vs MPG</button>
+            <button id="cylinders-mpg-btn">Cylinders vs MPG</button>
         </div>
         <div id="cylinders-mpg-controls" class="controls" style="display: none;">
             <label for="mpg-type-select">Select MPG Type: </label>
