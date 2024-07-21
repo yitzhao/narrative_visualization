@@ -7,30 +7,47 @@ d3.csv("cars2017.csv").then(function(data) {
     });
 
     // Initial scene
+    console.log("Creating initial scene...");
     createOverviewScene(data);
 
     // Event listeners for buttons
-    d3.select("#overview-btn").on("click", () => createOverviewScene(data));
-    d3.select("#mpg-scatter-btn").on("click", () => createScatterPlotScene(data));
+    console.log("Adding event listeners...");
+    d3.select("#overview-btn").on("click", () => {
+        console.log("Overview button clicked");
+        createOverviewScene(data);
+    });
+    d3.select("#mpg-scatter-btn").on("click", () => {
+        console.log("MPG scatter button clicked");
+        createScatterPlotScene(data);
+    });
     d3.select("#cylinders-mpg-btn").on("click", () => {
+        console.log("Cylinders MPG button clicked");
         createEngineCylindersScene(data);
         d3.select("#cylinders-mpg-controls").style("display", "block");
     });
-    d3.select("#fuel-mpg-btn").on("click", () => createFuelTypeScene(data));
+    d3.select("#fuel-mpg-btn").on("click", () => {
+        console.log("Fuel MPG button clicked");
+        createFuelTypeScene(data);
+    });
 
     d3.select("#mpg-type-select").on("change", function() {
         const selected = d3.select(this).property("value");
+        console.log(`MPG type selected: ${selected}`);
         updateEngineCylindersScene(data, selected);
     });
 });
 
 function createOverviewScene(data) {
+    console.log("Creating overview scene...");
     d3.select("#viz").html("");
+    d3.select("#cylinders-mpg-controls").style("display", "none");
     // Add code to create the overview visualization
 }
 
 function createScatterPlotScene(data) {
+    console.log("Creating scatter plot scene...");
     d3.select("#viz").html("");
+    d3.select("#cylinders-mpg-controls").style("display", "none");
 
     const svg = d3.select("#viz").append("svg")
         .attr("width", 800)
@@ -78,6 +95,7 @@ function createScatterPlotScene(data) {
 }
 
 function createEngineCylindersScene(data) {
+    console.log("Creating engine cylinders scene...");
     d3.select("#viz").html("");
 
     const svg = d3.select("#viz").append("svg")
@@ -120,6 +138,7 @@ function createEngineCylindersScene(data) {
 }
 
 function updateEngineCylindersScene(data, selected) {
+    console.log("Updating engine cylinders scene...");
     const svg = d3.select("#viz svg");
     const y = d3.scaleLinear()
         .domain(d3.extent(data, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG))
@@ -141,7 +160,9 @@ function updateEngineCylindersScene(data, selected) {
 }
 
 function createFuelTypeScene(data) {
+    console.log("Creating fuel type scene...");
     d3.select("#viz").html("");
+    d3.select("#cylinders-mpg-controls").style("display", "none");
 
     const svg = d3.select("#viz").append("svg")
         .attr("width", 800)
