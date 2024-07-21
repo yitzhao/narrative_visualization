@@ -158,46 +158,45 @@ function createScatterPlotScene(data) {
     svg.append("text")
         .attr("x", 630)
         .attr("y", 290)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "start")
         .style("font-size", "14px")
         .text("These cars have both high city and highway MPG. ");
 
     svg.append("text")
         .attr("x", 630)
         .attr("y", 310)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "start")
         .style("font-size", "14px")
         .text("Car makes from Tesla,  BMW, Hyundai, Nissan, Kia, ");
 
     svg.append("text")
         .attr("x", 630)
         .attr("y", 330)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "start")
         .style("font-size", "14px")
         .text("Chevrolet, Fiat, Ford, and Mercedes-Benz.");
     
     svg.append("text")
         .attr("x", 630)
         .attr("y", 350)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "start")
         .style("font-size", "14px")
         .text("Hover over to check more details.");
 }
 
 function createEngineCylindersScene(data) {
-    console.log("Creating engine cylinders scene...");
     d3.select("#viz").html("");
     d3.selectAll(".controls").style("display", "none");
     d3.select("#cylinders-mpg-controls").style("display", "block");
 
     const svg = d3.select("#viz").append("svg")
-        .attr("width", 800)
+        .attr("width", 1000)
         .attr("height", 600);
 
     const x = d3.scaleLinear()
         .domain(d3.extent(data, d => d.EngineCylinders))
-        .range([50, 750]);
-    
+        .range([50, 950]);
+
     const y = d3.scaleLinear()
         .domain([0, d3.max(data, d => d.AverageCityMPG)])
         .range([550, 50]);
@@ -245,12 +244,12 @@ function createEngineCylindersScene(data) {
         .style("font-size", "12px");
 
     svg.append("text")
-        .attr("x", 400)
+        .attr("x", 500)
         .attr("y", 590)  // Adjusted to position the label below the x-axis
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text("Engine Cylinders");
+        .text("Number of Engine Cylinders");
 
     svg.append("g")
         .attr("class", "y-axis")
@@ -269,37 +268,39 @@ function createEngineCylindersScene(data) {
         .text("City MPG");
 
     svg.append("text")
-        .attr("x", 400)
+        .attr("x", 500)
         .attr("y", 30)
         .attr("text-anchor", "middle")
         .attr("class", "title")
         .style("font-size", "22px")
         .style("font-weight", "bold")
-        .text("Engine Cylinders vs City MPG");
+        .text("Number of Engine Cylinders vs City MPG");
 
     // Add annotation for 0 cylinder points
+    const zeroCylinderCars = data.filter(d => d.EngineCylinders === 0);
+    const carMakes = [...new Set(zeroCylinderCars.map(d => d.Make))].join(", ");
+
     const annotationGroup = svg.append("g");
 
     annotationGroup.append("rect")
         .attr("x", x(0) - 20)
-        .attr("y", y(160))
+        .attr("y", y(d3.max(zeroCylinderCars, d => d.AverageCityMPG)))
         .attr("width", 40)
-        .attr("height", y(80) - y(160))
+        .attr("height", y(80) - y(d3.max(zeroCylinderCars, d => d.AverageCityMPG)))
         .attr("fill", "lightgreen")
         .attr("opacity", 0.1)
         .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
 
     annotationGroup.append("text")
         .attr("x", x(0) + 50)
-        .attr("y", y(120))
+        .attr("y", y((d3.max(zeroCylinderCars, d => d.AverageCityMPG) + 80) / 2))
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text("The 0 engine cylinder cars are more fuel-efficient");
+        .text(`The 0-engine cylinder cars are more fuel-efficient. Car makes include ${carMakes}.`);
 }
 
 function updateEngineCylindersScene(data, selected) {
-    console.log("Updating engine cylinders scene...");
     const svg = d3.select("#viz svg");
 
     const y = d3.scaleLinear()
@@ -319,19 +320,22 @@ function updateEngineCylindersScene(data, selected) {
         .call(yAxis);
 
     svg.select("text.title")
-        .text(`Engine Cylinders vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
+        .text(`Number of Engine Cylinders vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
 
     svg.select(".y-axis text")
         .text(selected === "city" ? "City MPG" : "Highway MPG");
 
     // Update annotation for 0 cylinder points
+    const zeroCylinderCars = data.filter(d => d.EngineCylinders === 0);
+    const carMakes = [...new Set(zeroCylinderCars.map(d => d.Make))].join(", ");
+
     const annotationGroup = svg.select("g").selectAll("rect").remove();
 
     annotationGroup.append("rect")
         .attr("x", x(0) - 20)
-        .attr("y", y(160))
+        .attr("y", y(d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)))
         .attr("width", 40)
-        .attr("height", y(80) - y(160))
+        .attr("height", y(80) - y(d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)))
         .attr("fill", "lightgreen")
         .attr("opacity", 0.1)
         .attr("pointer-events", "none");
@@ -340,13 +344,12 @@ function updateEngineCylindersScene(data, selected) {
     annotationGroup.append("text")
         .attr("class", "annotation")
         .attr("x", x(0) + 50)
-        .attr("y", y(120))
+        .attr("y", y((d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG) + 80) / 2))
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text("The 0 engine cylinder cars are more fuel-efficient");
+        .text(`The 0-engine cylinder cars are more fuel-efficient. Car makes include ${carMakes}.`);
 }
-
 
 function createFuelTypeScene(data) {
     d3.select("#viz").html("");
@@ -376,7 +379,7 @@ function createFuelTypeScene(data) {
     const x = d3.scaleBand()
         .domain(fuelData.map(d => d.key))
         .range([50, svgWidth - 50])
-        .padding(0.1);
+        .padding(0.2);  // Increased padding for narrower bars
 
     const y = d3.scaleLinear()
         .domain([0, d3.max(fuelData, d => d.value.AverageCityMPG)])
@@ -500,7 +503,7 @@ function updateFuelTypeScene(data, selected) {
     const x = d3.scaleBand()
         .domain(fuelData.map(d => d.key))
         .range([50, 1150])
-        .padding(0.1);
+        .padding(0.2);  // Increased padding for narrower bars
 
     const yAxis = d3.axisLeft(y);
     const xAxis = d3.axisBottom(x);
@@ -547,9 +550,8 @@ function updateFuelTypeScene(data, selected) {
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text(`Electric cars are the most fuel-efficient,\nwith car makes: ${carMakesList}`);
+        .text(`Electric cars are the most fuel-efficient, with car makes: ${carMakesList}`);
 }
-
 
 function createMakeMPGScene(data) {
     d3.select("#viz").html("");
@@ -571,7 +573,7 @@ function createMakeMPGScene(data) {
         }
     }));
 
-    const sortedData = groupedData.sort((a, b) => a.value.AverageCityMPG - b.value.AverageCityMPG);
+    const sortedData = groupedData.sort((a, b) => b.value.AverageCityMPG - a.value.AverageCityMPG).slice(0, 30);
 
     const x = d3.scaleBand()
         .domain(sortedData.map(d => d.key))
@@ -674,7 +676,23 @@ function createMakeMPGScene(data) {
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text("These are fuel-efficient car makes with average MPG over 60.");
+        .text("These are highly fuel-efficient car makes");
+    
+    svg.append("text")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
+        .attr("y", 90)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("with average city/highway MPG both over 50.");
+    
+    svg.append("text")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
+        .attr("y", 110)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Car makes include Tesla, Hyundai, Fiat, and Mitsubishi.");
 }
 
 function updateMakeMPGScene(data, selected) {
@@ -688,7 +706,7 @@ function updateMakeMPGScene(data, selected) {
         }
     }));
 
-    const sortedData = groupedData.sort((a, b) => selected === "city" ? a.value.AverageCityMPG - b.value.AverageCityMPG : a.value.AverageHighwayMPG - b.value.AverageHighwayMPG);
+    const sortedData = groupedData.sort((a, b) => selected === "city" ? b.value.AverageCityMPG - a.value.AverageCityMPG : b.value.AverageHighwayMPG - a.value.AverageHighwayMPG).slice(0, 30);
 
     const y = d3.scaleLinear()
         .domain([0, d3.max(sortedData, d => selected === "city" ? d.value.AverageCityMPG : d.value.AverageHighwayMPG)])
@@ -747,7 +765,8 @@ function updateMakeMPGScene(data, selected) {
         .attr("y", 70)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .text("These are highly fuel-efficient car makes ");
+        .style("font-weight", "bold")
+        .text("These are highly fuel-efficient car makes");
     
     svg.append("text")
         .attr("class", "annotation")
@@ -755,6 +774,7 @@ function updateMakeMPGScene(data, selected) {
         .attr("y", 90)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
+        .style("font-weight", "bold")
         .text("with average city/highway MPG both over 50.");
     
     svg.append("text")
@@ -763,5 +783,6 @@ function updateMakeMPGScene(data, selected) {
         .attr("y", 110)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
-        .text("Car makes include Tesla, Hyundai, Fiat and Mitsubishi.");
+        .style("font-weight", "bold")
+        .text("Car makes include Tesla, Hyundai, Fiat, and Mitsubishi.");
 }
