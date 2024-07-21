@@ -103,21 +103,27 @@ function createScatterPlotScene(data) {
     svg.append("g")
         .attr("transform", "translate(0, 550)")
         .call(xAxis)
-        .append("text")
+        .selectAll("text")  // Select all x-tick text elements
+        .style("font-size", "12px");  // Adjust font size as needed;
+    
+    svg.append("text")
         .attr("x", 400)
-        .attr("y", 40)
+        .attr("y", 590)  // Adjusted to position the label below the x-axis
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("City MPG");
-
+    
     svg.append("g")
         .attr("transform", "translate(50, 0)")
         .call(yAxis)
-        .append("text")
+        .selectAll("text")  // Select all y-tick text elements
+        .style("font-size", "12px");  // Adjust font size as needed
+    
+    svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("x", -275)
-        .attr("y", -40)
+        .attr("x", -300)  // Adjusted to position the label along the y-axis
+        .attr("y", 15)    // Adjusted to position the label near the y-axis
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
@@ -137,7 +143,7 @@ function createScatterPlotScene(data) {
         .attr("y", 50)
         .attr("width", 200)
         .attr("height", 200)
-        .attr("fill", "lightcoral")
+        .attr("fill", "lightgreen")
         .attr("opacity", 0.1)
         .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
 
@@ -150,28 +156,28 @@ function createScatterPlotScene(data) {
         .text("Fuel Efficient Cars");
 
     svg.append("text")
-        .attr("x", 650)
+        .attr("x", 630)
         .attr("y", 290)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .text("These cars have both high city and highway MPG. ");
 
     svg.append("text")
-        .attr("x", 650)
+        .attr("x", 630)
         .attr("y", 310)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .text("Car makes from Tesla,  BMW, Hyundai, Nissan, Kia, ");
 
     svg.append("text")
-        .attr("x", 650)
+        .attr("x", 630)
         .attr("y", 330)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .text("Chevrolet, Fiat, Ford, and Mercedes-Benz.");
     
     svg.append("text")
-        .attr("x", 650)
+        .attr("x", 630)
         .attr("y", 350)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
@@ -235,21 +241,28 @@ function createEngineCylindersScene(data) {
     svg.append("g")
         .attr("transform", "translate(0, 550)")
         .call(xAxis)
-        .append("text")
-        .attr("x", 375)
-        .attr("y", 40)
+        .selectAll("text")
+        .style("font-size", "12px");
+
+    svg.append("text")
+        .attr("x", 400)
+        .attr("y", 590)  // Adjusted to position the label below the x-axis
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("Engine Cylinders");
 
     svg.append("g")
+        .attr("class", "y-axis")
         .attr("transform", "translate(50, 0)")
         .call(yAxis)
-        .append("text")
+        .selectAll("text")
+        .style("font-size", "12px");
+
+    svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("x", -275)
-        .attr("y", -35)
+        .attr("x", -300)  // Adjusted to position the label along the y-axis
+        .attr("y", 15)    // Adjusted to position the label near the y-axis
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
@@ -268,21 +281,20 @@ function createEngineCylindersScene(data) {
 
     annotationGroup.append("rect")
         .attr("x", x(0) - 10)
-        .attr("y", y(d3.max(data, d => d.EngineCylinders === 0 ? d.AverageCityMPG : -Infinity)) - 10)
+        .attr("y", y(160))
         .attr("width", 20)
-        .attr("height", 20)
-        .attr("fill", "none")
-        .attr("stroke", "red")
-        .attr("stroke-width", 1);
+        .attr("height", y(100) - y(160))
+        .attr("fill", "lightgreen")
+        .attr("opacity", 0.1)
+        .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
 
     annotationGroup.append("text")
-        .attr("x", x(0))
-        .attr("y", y(d3.max(data, d => d.EngineCylinders === 0 ? d.AverageCityMPG : -Infinity)) - 15)
-        .attr("text-anchor", "middle")
+        .attr("x", x(0) + 30)
+        .attr("y", y(130))
+        .attr("text-anchor", "start")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .style("font-weight", "bold")
-        .text("The 0 engine cylinder cars are generally more fuel-efficient");
+        .text("The 0 engine cylinder cars are more fuel-efficient");
 }
 
 function updateEngineCylindersScene(data, selected) {
@@ -307,6 +319,9 @@ function updateEngineCylindersScene(data, selected) {
 
     svg.select("text.title")
         .text(`Engine Cylinders vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
+
+    svg.select(".y-axis text")
+        .text(selected === "city" ? "City MPG" : "Highway MPG");
 }
 
 function createFuelTypeScene(data) {
@@ -316,13 +331,13 @@ function createFuelTypeScene(data) {
     d3.select("#fuel-mpg-controls").style("display", "block");
 
     // Group data by fuel type and calculate average MPG
-    const fuelData = d3.nest()
-        .key(d => d.Fuel)
-        .rollup(v => ({
-            AverageCityMPG: d3.mean(v, d => d.AverageCityMPG),
-            AverageHighwayMPG: d3.mean(v, d => d.AverageHighwayMPG)
-        }))
-        .entries(data);
+    const fuelData = Array.from(d3.group(data, d => d.Fuel), ([key, values]) => ({
+        key: key,
+        value: {
+            AverageCityMPG: d3.mean(values, d => d.AverageCityMPG),
+            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG)
+        }
+    }));
 
     // Sort data by average city MPG by default
     fuelData.sort((a, b) => a.value.AverageCityMPG - b.value.AverageCityMPG);
@@ -339,6 +354,16 @@ function createFuelTypeScene(data) {
     const y = d3.scaleLinear()
         .domain([0, d3.max(fuelData, d => d.value.AverageCityMPG)])
         .range([550, 50]);
+
+    const tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("background-color", "lightsteelblue")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px");
 
     svg.selectAll("rect")
         .data(fuelData)
@@ -423,13 +448,13 @@ function updateFuelTypeScene(data, selected) {
     const svg = d3.select("#viz svg");
 
     // Group data by fuel type and calculate average MPG
-    const fuelData = d3.nest()
-        .key(d => d.Fuel)
-        .rollup(v => ({
-            AverageCityMPG: d3.mean(v, d => d.AverageCityMPG),
-            AverageHighwayMPG: d3.mean(v, d => d.AverageHighwayMPG)
-        }))
-        .entries(data);
+    const fuelData = Array.from(d3.group(data, d => d.Fuel), ([key, values]) => ({
+        key: key,
+        value: {
+            AverageCityMPG: d3.mean(values, d => d.AverageCityMPG),
+            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG)
+        }
+    }));
 
     // Sort data by the selected MPG type
     fuelData.sort((a, b) => selected === "city" ? a.value.AverageCityMPG - b.value.AverageCityMPG : a.value.AverageHighwayMPG - b.value.AverageHighwayMPG);
@@ -491,7 +516,6 @@ function updateFuelTypeScene(data, selected) {
 
 
 function createMakeMPGScene(data) {
-    console.log("Creating make MPG scene...");
     d3.select("#viz").html("");
     d3.selectAll(".controls").style("display", "none");
     d3.select("#make-mpg-controls").style("display", "block");
@@ -500,13 +524,13 @@ function createMakeMPGScene(data) {
         .attr("width", 1000)  // Increased width for better readability
         .attr("height", 600);
 
-    const groupedData = d3.nest()
-        .key(d => d.Make)
-        .rollup(v => ({
-            AverageCityMPG: d3.mean(v, d => d.AverageCityMPG),
-            AverageHighwayMPG: d3.mean(v, d => d.AverageHighwayMPG)
-        }))
-        .entries(data);
+    const groupedData = Array.from(d3.group(data, d => d.Make), ([key, values]) => ({
+        key: key,
+        value: {
+            AverageCityMPG: d3.mean(values, d => d.AverageCityMPG),
+            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG)
+        }
+    }));
 
     const sortedData = groupedData.sort((a, b) => a.value.AverageCityMPG - b.value.AverageCityMPG);
 
@@ -614,13 +638,13 @@ function updateMakeMPGScene(data, selected) {
     console.log("Updating make MPG scene...");
     const svg = d3.select("#viz svg");
 
-    const groupedData = d3.nest()
-        .key(d => d.Make)
-        .rollup(v => ({
-            AverageCityMPG: d3.mean(v, d => d.AverageCityMPG),
-            AverageHighwayMPG: d3.mean(v, d => d.AverageHighwayMPG)
-        }))
-        .entries(data);
+    const groupedData = Array.from(d3.group(data, d => d.Make), ([key, values]) => ({
+        key: key,
+        value: {
+            AverageCityMPG: d3.mean(values, d => d.AverageCityMPG),
+            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG)
+        }
+    }));
 
     const sortedData = groupedData.sort((a, b) => selected === "city" ? a.value.AverageCityMPG - b.value.AverageCityMPG : a.value.AverageHighwayMPG - b.value.AverageHighwayMPG);
 
