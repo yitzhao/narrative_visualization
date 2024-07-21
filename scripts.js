@@ -156,28 +156,28 @@ function createScatterPlotScene(data) {
         .text("Fuel Efficient Cars");
 
     svg.append("text")
-        .attr("x", 510)
+        .attr("x", 500)
         .attr("y", 290)
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .text("These cars have both high city and highway MPG. ");
 
     svg.append("text")
-        .attr("x", 510)
+        .attr("x", 500)
         .attr("y", 310)
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .text("Car makes from Tesla,  BMW, Hyundai, Nissan, ");
 
     svg.append("text")
-        .attr("x", 510)
+        .attr("x", 500)
         .attr("y", 330)
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .text("Kia, Chevrolet, Fiat, Ford and Mercedes-Benz.");
     
     svg.append("text")
-        .attr("x", 510)
+        .attr("x", 500)
         .attr("y", 350)
         .attr("text-anchor", "start")
         .style("font-size", "14px")
