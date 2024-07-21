@@ -23,3 +23,7 @@ button {
 button:hover {
     background-color: #f0f0f0;
 }
+
+#cylinders-mpg-controls {
+    margin-top: 20px;
+}

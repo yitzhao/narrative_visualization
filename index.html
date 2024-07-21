@@ -3,20 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Data Narrative Visualization</title>
+    <title>Car Purchase Recommendations</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="https://d3js.org/d3-annotation.v2.min.js"></script>
 </head>
 <body>
     <div id="container">
-        <h1>Car Data Narrative Visualization</h1>
+        <h1>Car Purchase Recommendations</h1>
         <div id="viz"></div>
         <div id="controls">
-            <button id="intro-btn">Introduction</button>
-            <button id="mpg-btn">MPG Analysis</button>
-            <button id="horsepower-btn">Horsepower Analysis</button>
-            <button id="interactive-btn">Interactive Exploration</button>
+            <button id="overview-btn">Overview</button>
+            <button id="mpg-scatter-btn">City vs Highway MPG</button>
+            <button id="cylinders-mpg-btn">Cylinders vs MPG</button>
+            <button id="fuel-mpg-btn">Fuel Type vs MPG</button>
+        </div>
+        <div id="cylinders-mpg-controls" style="display: none;">
+            <label>Select MPG Type: </label>
+            <select id="mpg-type-select">
+                <option value="city">City MPG</option>
+                <option value="highway">Highway MPG</option>
+            </select>
         </div>
     </div>
     <script src="scripts.js"></script>
