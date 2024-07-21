@@ -27,3 +27,31 @@ button:hover {
 #cylinders-mpg-controls {
     margin-top: 20px;
 }
+
+.tooltip {
+    position: absolute;
+    text-align: left;
+    padding: 8px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+}
+
+.annotation-group .annotation-rect {
+    fill: none;
+    stroke: lightgray;
+    stroke-width: 2px;
+    opacity: 0.5;
+}
+
+.annotation-group .annotation-note-title {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.annotation-group .annotation-note-label {
+    font-size: 12px;
+}

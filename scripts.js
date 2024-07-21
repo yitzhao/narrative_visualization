@@ -63,13 +63,32 @@ function createScatterPlotScene(data) {
         .range([550, 50])
         .base(10);
 
+    // Tooltip
+    const tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
     svg.selectAll("circle")
         .data(data)
         .enter()
         .append("circle")
         .attr("cx", d => x(d.AverageCityMPG))
         .attr("cy", d => y(d.AverageHighwayMPG))
-        .attr("r", d => 2 + d.EngineCylinders);
+        .attr("r", d => 2 + d.EngineCylinders)
+        .attr("fill", "blue")
+        .on("mouseover", function(event, d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(`Make: ${d.Make}<br>Fuel Type: ${d.Fuel}<br>Engine Cylinders: ${d.EngineCylinders}<br>City MPG: ${d.AverageCityMPG}<br>Highway MPG: ${d.AverageHighwayMPG}`)
+                .style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 
     const xAxis = d3.axisBottom(x)
         .tickValues([10, 20, 50, 100])
@@ -92,6 +111,30 @@ function createScatterPlotScene(data) {
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
         .text("City MPG vs Highway MPG (Log Scale)");
+
+    // Add annotation
+    const annotations = [{
+        note: {
+            label: "These cars are the most fuel efficient",
+            title: "Fuel Efficient Cars"
+        },
+        x: 550,
+        y: 100,
+        dy: -30,
+        dx: -30,
+        subject: {
+            width: 250,
+            height: 150
+        }
+    }];
+
+    const makeAnnotations = d3.annotation()
+        .type(d3.annotationCalloutRect)
+        .annotations(annotations);
+
+    svg.append("g")
+        .attr("class", "annotation-group")
+        .call(makeAnnotations);
 }
 
 function createEngineCylindersScene(data) {
