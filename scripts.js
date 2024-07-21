@@ -7,62 +7,30 @@ d3.csv("cars2017.csv").then(function(data) {
     });
 
     // Initial scene
-    createOverviewScene(data);
+    createScatterPlotScene(data);
 
     // Event listeners for buttons
-    d3.select("#overview-btn").on("click", () => createOverviewScene(data));
-    d3.select("#mpg-scatter-btn").on("click", () => createMPGScatterScene(data));
-    d3.select("#cylinders-mpg-btn").on("click", () => createCylindersMPGScene(data));
-    d3.select("#fuel-mpg-btn").on("click", () => createFuelMPGScene(data));
-
-    // Event listener for MPG type selection
-    d3.select("#mpg-type-select").on("change", function() {
-        createCylindersMPGScene(data);
-    });
+    d3.select("#scatterplot-btn").on("click", () => createScatterPlotScene(data));
+    d3.select("#enginecylinders-btn").on("click", () => createEngineCylindersScene(data));
+    d3.select("#fueltype-btn").on("click", () => createFuelTypeScene(data));
 });
 
-function createOverviewScene(data) {
+function createScatterPlotScene(data) {
     d3.select("#viz").html("");
-    d3.select("#cylinders-mpg-controls").style("display", "none");
-
-    const svg = d3.select("#viz").append("svg")
-        .attr("width", 800)
-        .attr("height", 600);
-
-    svg.append("text")
-        .attr("x", 400)
-        .attr("y", 300)
-        .attr("text-anchor", "middle")
-        .style("font-size", "24px")
-        .text("Car Purchase Recommendations");
-
-    svg.append("text")
-        .attr("x", 400)
-        .attr("y", 350)
-        .attr("text-anchor", "middle")
-        .style("font-size", "18px")
-        .text("Explore the best car options based on various criteria.");
-}
-
-function createMPGScatterScene(data) {
-    d3.select("#viz").html("");
-    d3.select("#cylinders-mpg-controls").style("display", "none");
 
     const svg = d3.select("#viz").append("svg")
         .attr("width", 800)
         .attr("height", 600);
 
     const x = d3.scaleLog()
-        .base(10)
         .domain([10, 150])
-        .range([50, 750]);
-
+        .range([50, 750])
+        .base(10);
+    
     const y = d3.scaleLog()
-        .base(10)
         .domain([10, 150])
-        .range([550, 50]);
-
-    const r = d => 2 + d.EngineCylinders;
+        .range([550, 50])
+        .base(10);
 
     svg.selectAll("circle")
         .data(data)
@@ -70,12 +38,11 @@ function createMPGScatterScene(data) {
         .append("circle")
         .attr("cx", d => x(d.AverageCityMPG))
         .attr("cy", d => y(d.AverageHighwayMPG))
-        .attr("r", r);
+        .attr("r", d => 2 + d.EngineCylinders);
 
     const xAxis = d3.axisBottom(x)
         .tickValues([10, 20, 50, 100])
         .tickFormat(d3.format("~s"));
-
     const yAxis = d3.axisLeft(y)
         .tickValues([10, 20, 50, 100])
         .tickFormat(d3.format("~s"));
@@ -92,42 +59,23 @@ function createMPGScatterScene(data) {
         .attr("x", 400)
         .attr("y", 30)
         .attr("text-anchor", "middle")
-        .style("font-size", "20px")
+        .style("font-size", "18px")
         .text("City MPG vs Highway MPG (Log Scale)");
-
-    svg.append("text")
-        .attr("x", 400)
-        .attr("y", 590)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .text("Average City MPG");
-
-    svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -300)
-        .attr("y", 15)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .text("Average Highway MPG");
 }
 
-function createCylindersMPGScene(data) {
+function createEngineCylindersScene(data) {
     d3.select("#viz").html("");
-    d3.select("#cylinders-mpg-controls").style("display", "block");
-
-    const mpgType = d3.select("#mpg-type-select").property("value");
-    const yValue = mpgType === "city" ? "AverageCityMPG" : "AverageHighwayMPG";
 
     const svg = d3.select("#viz").append("svg")
         .attr("width", 800)
         .attr("height", 600);
 
     const x = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.EngineCylinders)])
+        .domain(d3.extent(data, d => d.EngineCylinders))
         .range([50, 750]);
-
+    
     const y = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d[yValue])])
+        .domain(d3.extent(data, d => d.AverageCityMPG))
         .range([550, 50]);
 
     svg.selectAll("circle")
@@ -135,7 +83,7 @@ function createCylindersMPGScene(data) {
         .enter()
         .append("circle")
         .attr("cx", d => x(d.EngineCylinders))
-        .attr("cy", d => y(d[yValue]))
+        .attr("cy", d => y(d.AverageCityMPG))
         .attr("r", 5);
 
     const xAxis = d3.axisBottom(x);
@@ -146,4 +94,110 @@ function createCylindersMPGScene(data) {
         .call(xAxis);
 
     svg.append("g")
-        .attr("transform", "translate &#8203;:citation[oaicite:0]{index=0}&#8203;
+        .attr("transform", "translate(50, 0)")
+        .call(yAxis);
+
+    svg.append("text")
+        .attr("x", 400)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "18px")
+        .text("Engine Cylinders vs City MPG");
+
+    // Adding a dropdown to switch between City and Highway MPG
+    d3.select("#controls").append("select")
+        .attr("id", "mpg-type")
+        .selectAll("option")
+        .data(["City MPG", "Highway MPG"])
+        .enter()
+        .append("option")
+        .attr("value", d => d)
+        .text(d => d);
+
+    d3.select("#mpg-type").on("change", function() {
+        const selected = d3.select(this).property("value");
+        y.domain(d3.extent(data, d => selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG));
+        svg.selectAll("circle")
+            .transition()
+            .duration(500)
+            .attr("cy", d => y(selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG));
+        svg.select(".y.axis")
+            .transition()
+            .duration(500)
+            .call(yAxis);
+        svg.select("text")
+            .text(`Engine Cylinders vs ${selected}`);
+    });
+}
+
+function createFuelTypeScene(data) {
+    d3.select("#viz").html("");
+
+    const svg = d3.select("#viz").append("svg")
+        .attr("width", 800)
+        .attr("height", 600);
+
+    const fuelTypes = Array.from(new Set(data.map(d => d.FuelType)));
+    const x = d3.scaleBand()
+        .domain(fuelTypes)
+        .range([50, 750])
+        .padding(0.1);
+
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.AverageCityMPG)])
+        .range([550, 50]);
+
+    svg.selectAll("rect")
+        .data(data)
+        .enter()
+        .append("rect")
+        .attr("x", d => x(d.FuelType))
+        .attr("y", d => y(d.AverageCityMPG))
+        .attr("width", x.bandwidth())
+        .attr("height", d => 550 - y(d.AverageCityMPG))
+        .attr("fill", "steelblue");
+
+    const xAxis = d3.axisBottom(x);
+    const yAxis = d3.axisLeft(y);
+
+    svg.append("g")
+        .attr("transform", "translate(0, 550)")
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("transform", "translate(50, 0)")
+        .call(yAxis);
+
+    svg.append("text")
+        .attr("x", 400)
+        .attr("y", 30)
+        .attr("text-anchor", "middle")
+        .style("font-size", "18px")
+        .text("Fuel Type vs City MPG");
+
+    // Adding a dropdown to switch between City and Highway MPG
+    d3.select("#controls").append("select")
+        .attr("id", "mpg-type-fuel")
+        .selectAll("option")
+        .data(["City MPG", "Highway MPG"])
+        .enter()
+        .append("option")
+        .attr("value", d => d)
+        .text(d => d);
+
+    d3.select("#mpg-type-fuel").on("change", function() {
+        const selected = d3.select(this).property("value");
+        y.domain([0, d3.max(data, d => selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG)]);
+        svg.selectAll("rect")
+            .transition()
+            .duration(500)
+            .attr("y", d => y(selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG))
+            .attr("height", d => 550 - y(selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG));
+        svg.select(".y.axis")
+            .transition()
+            .duration(500)
+            .call(yAxis);
+        svg.select("text")
+            .text(`Fuel Type vs ${selected}`);
+    });
+}
