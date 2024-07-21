@@ -199,7 +199,7 @@ function createEngineCylindersScene(data) {
         .range([50, 750]);
     
     const y = d3.scaleLinear()
-        .domain(d3.extent(data, d => d.AverageCityMPG))
+        .domain([0, d3.max(data, d => d.AverageCityMPG)])
         .range([550, 50]);
 
     // Tooltip
@@ -272,6 +272,7 @@ function createEngineCylindersScene(data) {
         .attr("x", 400)
         .attr("y", 30)
         .attr("text-anchor", "middle")
+        .attr("class", "title")
         .style("font-size", "22px")
         .style("font-weight", "bold")
         .text("Engine Cylinders vs City MPG");
@@ -280,17 +281,17 @@ function createEngineCylindersScene(data) {
     const annotationGroup = svg.append("g");
 
     annotationGroup.append("rect")
-        .attr("x", x(0) - 10)
+        .attr("x", x(0) - 20)
         .attr("y", y(160))
-        .attr("width", 20)
-        .attr("height", y(100) - y(160))
+        .attr("width", 40)
+        .attr("height", y(80) - y(160))
         .attr("fill", "lightgreen")
         .attr("opacity", 0.1)
         .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
 
     annotationGroup.append("text")
-        .attr("x", x(0) + 30)
-        .attr("y", y(130))
+        .attr("x", x(0) + 50)
+        .attr("y", y(120))
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .style("font-weight", "bold")
@@ -322,10 +323,32 @@ function updateEngineCylindersScene(data, selected) {
 
     svg.select(".y-axis text")
         .text(selected === "city" ? "City MPG" : "Highway MPG");
+
+    // Update annotation for 0 cylinder points
+    const annotationGroup = svg.select("g").selectAll("rect").remove();
+
+    annotationGroup.append("rect")
+        .attr("x", x(0) - 20)
+        .attr("y", y(160))
+        .attr("width", 40)
+        .attr("height", y(80) - y(160))
+        .attr("fill", "lightgreen")
+        .attr("opacity", 0.1)
+        .attr("pointer-events", "none");
+
+    svg.selectAll("text.annotation").remove();
+    annotationGroup.append("text")
+        .attr("class", "annotation")
+        .attr("x", x(0) + 50)
+        .attr("y", y(120))
+        .attr("text-anchor", "start")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("The 0 engine cylinder cars are more fuel-efficient");
 }
 
+
 function createFuelTypeScene(data) {
-    console.log("Creating fuel type scene...");
     d3.select("#viz").html("");
     d3.selectAll(".controls").style("display", "none");
     d3.select("#fuel-mpg-controls").style("display", "block");
@@ -335,25 +358,29 @@ function createFuelTypeScene(data) {
         key: key,
         value: {
             AverageCityMPG: d3.mean(values, d => d.AverageCityMPG),
-            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG)
+            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG),
+            carMakes: values.map(d => d.Make)
         }
     }));
 
     // Sort data by average city MPG by default
     fuelData.sort((a, b) => a.value.AverageCityMPG - b.value.AverageCityMPG);
 
+    const svgWidth = 1200;  // Increased width for better readability
+    const svgHeight = 600;
+
     const svg = d3.select("#viz").append("svg")
-        .attr("width", 1000)  // Increased width for better readability
-        .attr("height", 600);
+        .attr("width", svgWidth)
+        .attr("height", svgHeight);
 
     const x = d3.scaleBand()
         .domain(fuelData.map(d => d.key))
-        .range([50, 950])
+        .range([50, svgWidth - 50])
         .padding(0.1);
 
     const y = d3.scaleLinear()
         .domain([0, d3.max(fuelData, d => d.value.AverageCityMPG)])
-        .range([550, 50]);
+        .range([svgHeight - 50, 50]);
 
     const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
@@ -372,13 +399,14 @@ function createFuelTypeScene(data) {
         .attr("x", d => x(d.key))
         .attr("y", d => y(d.value.AverageCityMPG))
         .attr("width", x.bandwidth())
-        .attr("height", d => 550 - y(d.value.AverageCityMPG))
+        .attr("height", d => svgHeight - 50 - y(d.value.AverageCityMPG))
         .attr("fill", "lightblue")
         .on("mouseover", function(event, d) {
+            const carMakes = d.value.carMakes.join(", ");
             tooltip.transition()
                 .duration(200)
                 .style("opacity", .9);
-            tooltip.html(`Fuel Type: ${d.key}<br>Average City MPG: ${d.value.AverageCityMPG.toFixed(2)}<br>Average Highway MPG: ${d.value.AverageHighwayMPG.toFixed(2)}`)
+            tooltip.html(`Fuel Type: ${d.key}<br>Car Makes: ${carMakes}<br>Average City MPG: ${d.value.AverageCityMPG.toFixed(2)}<br>Average Highway MPG: ${d.value.AverageHighwayMPG.toFixed(2)}`)
                 .style("left", (event.pageX + 5) + "px")
                 .style("top", (event.pageY - 28) + "px");
         })
@@ -393,17 +421,21 @@ function createFuelTypeScene(data) {
 
     svg.append("g")
         .attr("class", "x-axis")
-        .attr("transform", "translate(0, 550)")
-        .call(xAxis);
+        .attr("transform", `translate(0, ${svgHeight - 50})`)
+        .call(xAxis)
+        .selectAll("text")
+        .style("font-size", "14px");
 
     svg.append("g")
         .attr("class", "y-axis")
         .attr("transform", "translate(50, 0)")
-        .call(yAxis);
+        .call(yAxis)
+        .selectAll("text")
+        .style("font-size", "14px");
 
     svg.append("text")
         .attr("class", "title")
-        .attr("x", 500)
+        .attr("x", svgWidth / 2)
         .attr("y", 30)
         .attr("text-anchor", "middle")
         .style("font-size", "22px")
@@ -412,7 +444,7 @@ function createFuelTypeScene(data) {
 
     svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("x", -275)
+        .attr("x", -svgHeight / 2)
         .attr("y", 15)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
@@ -425,26 +457,27 @@ function createFuelTypeScene(data) {
     });
 
     // Annotation for the third bar
+    const thirdBar = fuelData[2];
+    const carMakesList = thirdBar.value.carMakes.join(", ");
     svg.append("rect")
-        .attr("x", x(fuelData[2].key) - 10)
-        .attr("y", y(fuelData[2].value.AverageCityMPG) - 20)
+        .attr("x", x(thirdBar.key) - 10)
+        .attr("y", y(thirdBar.value.AverageCityMPG))
         .attr("width", x.bandwidth() + 20)
-        .attr("height", 40)
+        .attr("height", svgHeight - 50 - y(thirdBar.value.AverageCityMPG))
         .attr("fill", "none")
         .attr("stroke", "red")
         .attr("stroke-width", 1);
 
     svg.append("text")
-        .attr("x", x(fuelData[2].key) + x.bandwidth() / 2)
-        .attr("y", y(fuelData[2].value.AverageCityMPG) - 25)
+        .attr("x", x(thirdBar.key) + x.bandwidth() / 2)
+        .attr("y", y(thirdBar.value.AverageCityMPG) + (svgHeight - 50 - y(thirdBar.value.AverageCityMPG)) / 2)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text("Generally, electric cars are more fuel-efficient");
+        .text(`Electric cars are the most fuel-efficient,\nwith car makes: ${carMakesList}`);
 }
 
 function updateFuelTypeScene(data, selected) {
-    console.log("Updating fuel type scene...");
     const svg = d3.select("#viz svg");
 
     // Group data by fuel type and calculate average MPG
@@ -452,7 +485,8 @@ function updateFuelTypeScene(data, selected) {
         key: key,
         value: {
             AverageCityMPG: d3.mean(values, d => d.AverageCityMPG),
-            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG)
+            AverageHighwayMPG: d3.mean(values, d => d.AverageHighwayMPG),
+            carMakes: values.map(d => d.Make)
         }
     }));
 
@@ -465,7 +499,7 @@ function updateFuelTypeScene(data, selected) {
 
     const x = d3.scaleBand()
         .domain(fuelData.map(d => d.key))
-        .range([50, 950])
+        .range([50, 1150])
         .padding(0.1);
 
     const yAxis = d3.axisLeft(y);
@@ -493,25 +527,27 @@ function updateFuelTypeScene(data, selected) {
         .text(`Fuel Type vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
 
     // Update annotation for the third bar
-    svg.selectAll(".annotation").remove();  // Remove existing annotations
+    svg.selectAll(".annotation").remove();
+    const thirdBar = fuelData[2];
+    const carMakesList = thirdBar.value.carMakes.join(", ");
     svg.append("rect")
         .attr("class", "annotation")
-        .attr("x", x(fuelData[2].key) - 10)
-        .attr("y", y(selected === "city" ? fuelData[2].value.AverageCityMPG : fuelData[2].value.AverageHighwayMPG) - 20)
+        .attr("x", x(thirdBar.key) - 10)
+        .attr("y", y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG))
         .attr("width", x.bandwidth() + 20)
-        .attr("height", 40)
+        .attr("height", 550 - y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG))
         .attr("fill", "none")
         .attr("stroke", "red")
         .attr("stroke-width", 1);
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(fuelData[2].key) + x.bandwidth() / 2)
-        .attr("y", y(selected === "city" ? fuelData[2].value.AverageCityMPG : fuelData[2].value.AverageHighwayMPG) - 25)
+        .attr("x", x(thirdBar.key) + x.bandwidth() / 2)
+        .attr("y", y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG) + (550 - y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG)) / 2)
         .attr("text-anchor", "middle")
-        .style("font-size", "12px")
+        .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text("Generally, electric cars are more fuel-efficient");
+        .text(`Electric cars are the most fuel-efficient,\nwith car makes: ${carMakesList}`);
 }
 
 
@@ -520,9 +556,12 @@ function createMakeMPGScene(data) {
     d3.selectAll(".controls").style("display", "none");
     d3.select("#make-mpg-controls").style("display", "block");
 
+    const svgWidth = 1200;  // Increased width for better readability and fitting all bars
+    const svgHeight = 650;
+
     const svg = d3.select("#viz").append("svg")
-        .attr("width", 1000)  // Increased width for better readability
-        .attr("height", 600);
+        .attr("width", svgWidth)
+        .attr("height", svgHeight);
 
     const groupedData = Array.from(d3.group(data, d => d.Make), ([key, values]) => ({
         key: key,
@@ -536,12 +575,12 @@ function createMakeMPGScene(data) {
 
     const x = d3.scaleBand()
         .domain(sortedData.map(d => d.key))
-        .range([50, 950])
+        .range([50, svgWidth - 50])
         .padding(0.1);
 
     const y = d3.scaleLinear()
         .domain([0, d3.max(sortedData, d => d.value.AverageCityMPG)])
-        .range([550, 50]);
+        .range([svgHeight - 50, 50]);
 
     const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
@@ -560,7 +599,7 @@ function createMakeMPGScene(data) {
         .attr("x", d => x(d.key))
         .attr("y", d => y(d.value.AverageCityMPG))
         .attr("width", x.bandwidth())
-        .attr("height", d => 550 - y(d.value.AverageCityMPG))
+        .attr("height", d => svgHeight - 50 - y(d.value.AverageCityMPG))
         .attr("fill", "lightblue")
         .on("mouseover", function(event, d) {
             tooltip.transition()
@@ -581,7 +620,7 @@ function createMakeMPGScene(data) {
 
     svg.append("g")
         .attr("class", "x-axis")
-        .attr("transform", "translate(0, 550)")
+        .attr("transform", `translate(0, ${svgHeight - 50})`)
         .call(xAxis)
         .selectAll("text")
         .attr("transform", "rotate(-45)")
@@ -590,11 +629,12 @@ function createMakeMPGScene(data) {
     svg.append("g")
         .attr("class", "y-axis")
         .attr("transform", "translate(50, 0)")
-        .call(yAxis);
+        .call(yAxis)
+        .style("font-size", "12px");
 
     svg.append("text")
         .attr("class", "title")
-        .attr("x", 500)  // Centered according to new width
+        .attr("x", svgWidth / 2)
         .attr("y", 30)
         .attr("text-anchor", "middle")
         .style("font-size", "22px")
@@ -603,7 +643,7 @@ function createMakeMPGScene(data) {
 
     svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("x", -300)
+        .attr("x", -svgHeight / 2)
         .attr("y", 15)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
@@ -616,17 +656,20 @@ function createMakeMPGScene(data) {
     });
 
     // Annotation for the rightmost bars
+    const numRightmostBars = 4;
+    const annotationStart = sortedData.length - numRightmostBars;
+
     svg.append("rect")
-        .attr("x", 750)  // Adjusted to cover the rightmost 10 bars
+        .attr("x", x(sortedData[annotationStart].key))  // Adjusted to cover the rightmost 4 bars
         .attr("y", 50)
-        .attr("width", 200)
-        .attr("height", 500)
-        .attr("fill", "lightcoral")
+        .attr("width", x.bandwidth() * numRightmostBars)
+        .attr("height", svgHeight - 100)
+        .attr("fill", "lightgreen")
         .attr("opacity", 0.1)
         .attr("pointer-events", "none");
 
     svg.append("text")
-        .attr("x", 850)
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
         .attr("y", 70)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
@@ -635,7 +678,6 @@ function createMakeMPGScene(data) {
 }
 
 function updateMakeMPGScene(data, selected) {
-    console.log("Updating make MPG scene...");
     const svg = d3.select("#viz svg");
 
     const groupedData = Array.from(d3.group(data, d => d.Make), ([key, values]) => ({
@@ -654,7 +696,7 @@ function updateMakeMPGScene(data, selected) {
 
     const x = d3.scaleBand()
         .domain(sortedData.map(d => d.key))
-        .range([50, 950])
+        .range([50, 1150])
         .padding(0.1);
 
     const yAxis = d3.axisLeft(y);
@@ -683,4 +725,43 @@ function updateMakeMPGScene(data, selected) {
 
     svg.select("text.title")
         .text(`Make vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
+
+    // Update annotation for the rightmost bars
+    svg.selectAll(".annotation").remove();
+    const numRightmostBars = 4;
+    const annotationStart = sortedData.length - numRightmostBars;
+
+    svg.append("rect")
+        .attr("class", "annotation")
+        .attr("x", x(sortedData[annotationStart].key))
+        .attr("y", 50)
+        .attr("width", x.bandwidth() * numRightmostBars)
+        .attr("height", 500)
+        .attr("fill", "lightgreen")
+        .attr("opacity", 0.1)
+        .attr("pointer-events", "none");
+
+    svg.append("text")
+        .attr("class", "annotation")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
+        .attr("y", 70)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("These are highly fuel-efficient car makes ");
+    
+    svg.append("text")
+        .attr("class", "annotation")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
+        .attr("y", 90)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("with average city/highway MPG both over 50.");
+    
+    svg.append("text")
+        .attr("class", "annotation")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
+        .attr("y", 110)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("Car makes include Tesla, Hyundai, Fiat and Mitsubishi.");
 }
