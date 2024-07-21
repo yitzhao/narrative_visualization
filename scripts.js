@@ -189,17 +189,20 @@ function createEngineCylindersScene(data) {
     d3.selectAll(".controls").style("display", "none");
     d3.select("#cylinders-mpg-controls").style("display", "block");
 
+    const svgWidth = 800;
+    const svgHeight = 600;
+
     const svg = d3.select("#viz").append("svg")
-        .attr("width", 800)
-        .attr("height", 600);
+        .attr("width", svgWidth)
+        .attr("height", svgHeight);
 
     const x = d3.scaleLinear()
         .domain(d3.extent(data, d => d.EngineCylinders))
-        .range([50, width-50]);
+        .range([50, svgWidth - 50]);
 
     const y = d3.scaleLinear()
         .domain([0, d3.max(data, d => d.AverageCityMPG)])
-        .range([550, 50]);
+        .range([svgHeight - 50, 50]);
 
     // Tooltip
     const tooltip = d3.select("body").append("div")
@@ -238,14 +241,14 @@ function createEngineCylindersScene(data) {
     const yAxis = d3.axisLeft(y);
 
     svg.append("g")
-        .attr("transform", "translate(0, 550)")
+        .attr("transform", `translate(0, ${svgHeight - 50})`)
         .call(xAxis)
         .selectAll("text")
         .style("font-size", "12px");
 
     svg.append("text")
-        .attr("x", 500)
-        .attr("y", 590)  // Adjusted to position the label below the x-axis
+        .attr("x", svgWidth / 2)
+        .attr("y", svgHeight - 10)  // Adjusted to position the label below the x-axis
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
@@ -260,15 +263,15 @@ function createEngineCylindersScene(data) {
 
     svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("x", -300)  // Adjusted to position the label along the y-axis
-        .attr("y", 15)    // Adjusted to position the label near the y-axis
+        .attr("x", -svgHeight / 2)
+        .attr("y", 15)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("City MPG");
 
     svg.append("text")
-        .attr("x", 500)
+        .attr("x", svgWidth / 2)
         .attr("y", 30)
         .attr("text-anchor", "middle")
         .attr("class", "title")
@@ -276,36 +279,7 @@ function createEngineCylindersScene(data) {
         .style("font-weight", "bold")
         .text("Number of Engine Cylinders vs City MPG");
 
-    // Add annotation for 0 cylinder points
-    const zeroCylinderCars = data.filter(d => d.EngineCylinders === 0);
-    const carMakes = [...new Set(zeroCylinderCars.map(d => d.Make))].join(", ");
-
-    const annotationGroup = svg.append("g");
-
-    annotationGroup.append("rect")
-        .attr("x", x(0) - 20)
-        .attr("y", y(d3.max(zeroCylinderCars, d => d.AverageCityMPG)))
-        .attr("width", 40)
-        .attr("height", y(80) - y(d3.max(zeroCylinderCars, d => d.AverageCityMPG)))
-        .attr("fill", "lightgreen")
-        .attr("opacity", 0.1)
-        .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
-
-    annotationGroup.append("text")
-        .attr("x", x(0) + 50)
-        .attr("y", y((d3.max(zeroCylinderCars, d => d.AverageCityMPG) + 80) / 2))
-        .attr("text-anchor", "start")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text(`The 0-engine cylinder cars are more fuel-efficient. Car makes`);
-    
-    annotationGroup.append("text")
-        .attr("x", x(0) + 50)
-        .attr("y", y((d3.max(zeroCylinderCars, d => d.AverageCityMPG) + 80) / 2))
-        .attr("text-anchor", "start")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text(`include ${carMakes}.`);
+    updateEngineCylindersAnnotation(svg, data, "city", x, y);
 }
 
 function updateEngineCylindersScene(data, selected) {
@@ -333,13 +307,18 @@ function updateEngineCylindersScene(data, selected) {
     svg.select(".y-axis text")
         .text(selected === "city" ? "City MPG" : "Highway MPG");
 
+    updateEngineCylindersAnnotation(svg, data, selected, x, y);
+}
+
+function updateEngineCylindersAnnotation(svg, data, selected, x, y) {
     // Update annotation for 0 cylinder points
     const zeroCylinderCars = data.filter(d => d.EngineCylinders === 0);
     const carMakes = [...new Set(zeroCylinderCars.map(d => d.Make))].join(", ");
 
-    const annotationGroup = svg.select("g").selectAll("rect").remove();
+    svg.selectAll(".annotation").remove();
 
-    annotationGroup.append("rect")
+    svg.append("rect")
+        .attr("class", "annotation")
         .attr("x", x(0) - 20)
         .attr("y", y(d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)))
         .attr("width", 40)
@@ -348,25 +327,25 @@ function updateEngineCylindersScene(data, selected) {
         .attr("opacity", 0.1)
         .attr("pointer-events", "none");
 
-    svg.selectAll("text.annotation").remove();
-    annotationGroup.append("text")
+    svg.append("text")
         .attr("class", "annotation")
         .attr("x", x(0) + 50)
         .attr("y", y((d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG) + 80) / 2))
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text(`The 0-engine cylinder cars are more fuel-efficient. Car makes `);
-    
-    annotationGroup.append("text")
+        .text(`The 0-engine cylinder cars are more fuel-efficient.`);
+
+    svg.append("text")
         .attr("class", "annotation")
         .attr("x", x(0) + 50)
         .attr("y", y((d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG) + 80) / 2) + 20)
         .attr("text-anchor", "start")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text(`include ${carMakes}.`);
+        .text(`Car makes include ${carMakes}.`);
 }
+
 
 function createFuelTypeScene(data) {
     d3.select("#viz").html("");
