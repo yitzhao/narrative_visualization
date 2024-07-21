@@ -7,13 +7,27 @@ d3.csv("cars2017.csv").then(function(data) {
     });
 
     // Initial scene
-    createScatterPlotScene(data);
+    createOverviewScene(data);
 
     // Event listeners for buttons
-    d3.select("#scatterplot-btn").on("click", () => createScatterPlotScene(data));
-    d3.select("#enginecylinders-btn").on("click", () => createEngineCylindersScene(data));
-    d3.select("#fueltype-btn").on("click", () => createFuelTypeScene(data));
+    d3.select("#overview-btn").on("click", () => createOverviewScene(data));
+    d3.select("#mpg-scatter-btn").on("click", () => createScatterPlotScene(data));
+    d3.select("#cylinders-mpg-btn").on("click", () => {
+        createEngineCylindersScene(data);
+        d3.select("#cylinders-mpg-controls").style("display", "block");
+    });
+    d3.select("#fuel-mpg-btn").on("click", () => createFuelTypeScene(data));
+
+    d3.select("#mpg-type-select").on("change", function() {
+        const selected = d3.select(this).property("value");
+        updateEngineCylindersScene(data, selected);
+    });
 });
+
+function createOverviewScene(data) {
+    d3.select("#viz").html("");
+    // Add code to create the overview visualization
+}
 
 function createScatterPlotScene(data) {
     d3.select("#viz").html("");
@@ -103,31 +117,27 @@ function createEngineCylindersScene(data) {
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
         .text("Engine Cylinders vs City MPG");
+}
 
-    // Adding a dropdown to switch between City and Highway MPG
-    d3.select("#controls").append("select")
-        .attr("id", "mpg-type")
-        .selectAll("option")
-        .data(["City MPG", "Highway MPG"])
-        .enter()
-        .append("option")
-        .attr("value", d => d)
-        .text(d => d);
+function updateEngineCylindersScene(data, selected) {
+    const svg = d3.select("#viz svg");
+    const y = d3.scaleLinear()
+        .domain(d3.extent(data, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG))
+        .range([550, 50]);
 
-    d3.select("#mpg-type").on("change", function() {
-        const selected = d3.select(this).property("value");
-        y.domain(d3.extent(data, d => selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG));
-        svg.selectAll("circle")
-            .transition()
-            .duration(500)
-            .attr("cy", d => y(selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG));
-        svg.select(".y.axis")
-            .transition()
-            .duration(500)
-            .call(yAxis);
-        svg.select("text")
-            .text(`Engine Cylinders vs ${selected}`);
-    });
+    svg.selectAll("circle")
+        .transition()
+        .duration(500)
+        .attr("cy", d => y(selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG));
+
+    const yAxis = d3.axisLeft(y);
+    svg.select(".y.axis")
+        .transition()
+        .duration(500)
+        .call(yAxis);
+
+    svg.select("text")
+        .text(`Engine Cylinders vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
 }
 
 function createFuelTypeScene(data) {
@@ -174,30 +184,4 @@ function createFuelTypeScene(data) {
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
         .text("Fuel Type vs City MPG");
-
-    // Adding a dropdown to switch between City and Highway MPG
-    d3.select("#controls").append("select")
-        .attr("id", "mpg-type-fuel")
-        .selectAll("option")
-        .data(["City MPG", "Highway MPG"])
-        .enter()
-        .append("option")
-        .attr("value", d => d)
-        .text(d => d);
-
-    d3.select("#mpg-type-fuel").on("change", function() {
-        const selected = d3.select(this).property("value");
-        y.domain([0, d3.max(data, d => selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG)]);
-        svg.selectAll("rect")
-            .transition()
-            .duration(500)
-            .attr("y", d => y(selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG))
-            .attr("height", d => 550 - y(selected === "City MPG" ? d.AverageCityMPG : d.AverageHighwayMPG));
-        svg.select(".y.axis")
-            .transition()
-            .duration(500)
-            .call(yAxis);
-        svg.select("text")
-            .text(`Fuel Type vs ${selected}`);
-    });
 }
