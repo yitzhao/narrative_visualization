@@ -117,7 +117,17 @@ function createScatterPlotScene(data) {
         .attr("text-anchor", "middle")
         .style("font-size", "18px")
         .text("City MPG vs Highway MPG (Log Scale)");
+    
+    // Note for hover information
+    svg.append("text")
+    .attr("x", 400)
+    .attr("y", 15)
+    .attr("text-anchor", "middle")
+    .style("font-size", "14px")
+    .style("font-weight", "bold")
+    .text("Hover over the points to see the general information of the cars");
 
+        
     // Add annotation
     svg.append("rect")
         .attr("x", 550)
@@ -125,20 +135,21 @@ function createScatterPlotScene(data) {
         .attr("width", 200)
         .attr("height", 200)
         .attr("fill", "lightgreen")
-        .attr("opacity", 0.3);
+        .attr("opacity", 0.3)
+        .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
 
     svg.append("text")
-        .attr("x", 650)
+        .attr("x", 760)
         .attr("y", 70)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "start")
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("Fuel Efficient Cars");
 
     svg.append("text")
-        .attr("x", 650)
+        .attr("x", 760)
         .attr("y", 90)
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "start")
         .style("font-size", "12px")
         .text("These cars have both high city and highway MPG.");
 }
