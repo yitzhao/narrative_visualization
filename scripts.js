@@ -151,7 +151,7 @@ function createScatterPlotScene(data) {
         .attr("x", 650)
         .attr("y", 270)
         .attr("text-anchor", "middle")
-        .style("font-size", "16px")
+        .style("font-size", "15px")
         .style("font-weight", "bold")
         .text("Fuel Efficient Cars");
 
@@ -159,28 +159,28 @@ function createScatterPlotScene(data) {
         .attr("x", 500)
         .attr("y", 290)
         .attr("text-anchor", "start")
-        .style("font-size", "14px")
+        .style("font-size", "13px")
         .text("These cars have both high city and highway MPG. ");
 
     svg.append("text")
         .attr("x", 500)
         .attr("y", 310)
         .attr("text-anchor", "start")
-        .style("font-size", "14px")
+        .style("font-size", "13px")
         .text("Car makes from Tesla,  BMW, Hyundai, Nissan, ");
 
     svg.append("text")
         .attr("x", 500)
         .attr("y", 330)
         .attr("text-anchor", "start")
-        .style("font-size", "14px")
+        .style("font-size", "13px")
         .text("Kia, Chevrolet, Fiat, Ford and Mercedes-Benz.");
     
     svg.append("text")
         .attr("x", 500)
         .attr("y", 350)
         .attr("text-anchor", "start")
-        .style("font-size", "14px")
+        .style("font-size", "13px")
         .text("Hover over to check more details.");
 }
 
@@ -692,42 +692,7 @@ function createMakeMPGScene(data) {
         updateMakeMPGScene(data, selected);
     });
 
-    // Annotation for the rightmost bars
-    const numRightmostBars = 4;
-    const annotationStart = sortedData.length - numRightmostBars;
-
-    svg.append("rect")
-        .attr("x", x(sortedData[annotationStart].key))  // Adjusted to cover the rightmost 4 bars
-        .attr("y", 50)
-        .attr("width", x.bandwidth() * numRightmostBars)
-        .attr("height", svgHeight - 100)
-        .attr("fill", "lightgreen")
-        .attr("opacity", 0.1)
-        .attr("pointer-events", "none");
-
-    svg.append("text")
-        .attr("x", x(sortedData[annotationStart].key))
-        .attr("y", 70)
-        .attr("text-anchor", "start")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text("These are highly fuel-efficient car makes");
-    
-    svg.append("text")
-        .attr("x", x(sortedData[annotationStart].key))
-        .attr("y", 90)
-        .attr("text-anchor", "start")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text("with average city/highway MPG both over 50.");
-    
-    svg.append("text")
-        .attr("x", x(sortedData[annotationStart].key))
-        .attr("y", 110)
-        .attr("text-anchor", "start")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text("Car makes include Tesla, Hyundai, Fiat, and Mitsubishi.");
+    updateAnnotation(svg, sortedData, "city", numRightmostBars, 50, svgHeight, x);
 }
 
 function updateMakeMPGScene(data, selected) {
@@ -780,16 +745,19 @@ function updateMakeMPGScene(data, selected) {
         .text(`Make vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
 
     // Update annotation for the rightmost bars
+    updateAnnotation(svg, sortedData, selected, numRightmostBars, 50, svgHeight, x);
+}
+
+function updateAnnotation(svg, sortedData, mpgType, numRightmostBars, marginTop, svgHeight, x) {
     svg.selectAll(".annotation").remove();
-    const numRightmostBars = 4;
     const annotationStart = sortedData.length - numRightmostBars;
 
     svg.append("rect")
         .attr("class", "annotation")
         .attr("x", x(sortedData[annotationStart].key))
-        .attr("y", 50)
+        .attr("y", marginTop)
         .attr("width", x.bandwidth() * numRightmostBars)
-        .attr("height", 500)
+        .attr("height", svgHeight - marginTop - 50)
         .attr("fill", "lightgreen")
         .attr("opacity", 0.1)
         .attr("pointer-events", "none");
@@ -797,25 +765,25 @@ function updateMakeMPGScene(data, selected) {
     svg.append("text")
         .attr("class", "annotation")
         .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
-        .attr("y", 70)
+        .attr("y", marginTop + 20)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text("These are highly fuel-efficient car makes");
-    
+
     svg.append("text")
         .attr("class", "annotation")
         .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
-        .attr("y", 90)
+        .attr("y", marginTop + 40)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text("with average city/highway MPG both over 50.");
-    
+        .text(`with average ${mpgType} MPG both over 50.`);
+
     svg.append("text")
         .attr("class", "annotation")
         .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
-        .attr("y", 110)
+        .attr("y", marginTop + 60)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
