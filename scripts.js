@@ -137,7 +137,7 @@ function createFuelTypeScene(data) {
         .attr("width", 800)
         .attr("height", 600);
 
-    const fuelTypes = Array.from(new Set(data.map(d => d.FuelType)));
+    const fuelTypes = Array.from(new Set(data.map(d => d.Fuel)));
     const x = d3.scaleBand()
         .domain(fuelTypes)
         .range([50, 750])
@@ -151,7 +151,7 @@ function createFuelTypeScene(data) {
         .data(data)
         .enter()
         .append("rect")
-        .attr("x", d => x(d.FuelType))
+        .attr("x", d => x(d.Fuel))
         .attr("y", d => y(d.AverageCityMPG))
         .attr("width", x.bandwidth())
         .attr("height", d => 550 - y(d.AverageCityMPG))
