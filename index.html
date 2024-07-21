@@ -6,7 +6,6 @@
     <title>Car Purchase Recommendations</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v6.min.js"></script>
-    <!-- Load d3-annotation locally or from a reliable CDN -->
     <script src="https://cdn.jsdelivr.net/npm/d3-svg-annotation@2/d3-annotation.min.js"></script>
 </head>
 <body>
@@ -18,10 +17,25 @@
             <button id="mpg-scatter-btn">City vs Highway MPG</button>
             <button id="cylinders-mpg-btn">Cylinders vs MPG</button>
             <button id="fuel-mpg-btn">Fuel Type vs MPG</button>
+            <button id="make-mpg-btn">Make vs MPG</button>
         </div>
-        <div id="cylinders-mpg-controls" style="display: none;">
+        <div id="cylinders-mpg-controls" class="controls" style="display: none;">
             <label for="mpg-type-select">Select MPG Type: </label>
             <select id="mpg-type-select">
+                <option value="city">City MPG</option>
+                <option value="highway">Highway MPG</option>
+            </select>
+        </div>
+        <div id="fuel-mpg-controls" class="controls" style="display: none;">
+            <label for="mpg-type-fuel">Select MPG Type: </label>
+            <select id="mpg-type-fuel">
+                <option value="city">City MPG</option>
+                <option value="highway">Highway MPG</option>
+            </select>
+        </div>
+        <div id="make-mpg-controls" class="controls" style="display: none;">
+            <label for="mpg-type-make">Select MPG Type: </label>
+            <select id="mpg-type-make">
                 <option value="city">City MPG</option>
                 <option value="highway">Highway MPG</option>
             </select>
@@ -30,4 +44,3 @@
     <script src="scripts.js"></script>
 </body>
 </html>
-
