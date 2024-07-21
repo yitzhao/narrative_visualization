@@ -66,7 +66,13 @@ function createScatterPlotScene(data) {
     // Tooltip
     const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
-        .style("opacity", 0);
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("background-color", "lightsteelblue")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px");
 
     svg.selectAll("circle")
         .data(data)
@@ -113,29 +119,30 @@ function createScatterPlotScene(data) {
         .text("City MPG vs Highway MPG (Log Scale)");
 
     // Add annotation
-    const annotations = [{
-        note: {
-            label: "These cars are the most fuel efficient",
-            title: "Fuel Efficient Cars"
-        },
-        x: 550,
-        y: 100,
-        dy: -30,
-        dx: -30,
-        subject: {
-            width: 250,
-            height: 150
-        }
-    }];
+    svg.append("rect")
+        .attr("x", 550)
+        .attr("y", 50)
+        .attr("width", 200)
+        .attr("height", 200)
+        .attr("fill", "lightgreen")
+        .attr("opacity", 0.3);
 
-    const makeAnnotations = d3.annotation()
-        .type(d3.annotationCalloutRect)
-        .annotations(annotations);
+    svg.append("text")
+        .attr("x", 650)
+        .attr("y", 70)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .style("font-weight", "bold")
+        .text("Fuel Efficient Cars");
 
-    svg.append("g")
-        .attr("class", "annotation-group")
-        .call(makeAnnotations);
+    svg.append("text")
+        .attr("x", 650)
+        .attr("y", 90)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("These cars have both high city and highway MPG.");
 }
+
 
 function createEngineCylindersScene(data) {
     console.log("Creating engine cylinders scene...");
