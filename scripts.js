@@ -744,7 +744,7 @@ function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, mar
         .attr("text-anchor", "start")
         .style("font-size", "13px")
         .style("font-weight", "bold")
-        .text(`with average ${mpgType} MPG both over 50. Include`);
+        .text(`with average MPG over 50. Include`);
 
     svg.append("text")
         .attr("class", "annotation")
