@@ -285,6 +285,10 @@ function createEngineCylindersScene(data) {
 function updateEngineCylindersScene(data, selected) {
     const svg = d3.select("#viz svg");
 
+    const x = d3.scaleLinear()
+        .domain(d3.extent(data, d => d.EngineCylinders))
+        .range([50, 750]);
+
     const y = d3.scaleLinear()
         .domain([0, d3.max(data, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)])
         .range([550, 50]);
@@ -650,7 +654,7 @@ function createMakeMPGScene(data) {
         const selected = d3.select(this).property("value");
         updateMakeMPGScene(data, selected);
     });
-
+    const numRightmostBars = 4;
     updateMakeMPGAnnotation(svg, sortedData, "city", numRightmostBars, 50, svgHeight, x);
 }
 
