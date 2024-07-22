@@ -143,8 +143,9 @@ function createScatterPlotScene(data) {
         .attr("y", 50)
         .attr("width", 200)
         .attr("height", 200)
-        .attr("fill", "lightgreen")
-        .attr("opacity", 0.1)
+        .attr("fill", "none")
+        .attr("stroke", "green")
+        .attr("stroke-width", 1)
         .attr("pointer-events", "none"); // Make the rectangle not interfere with mouse events
 
     svg.append("text")
@@ -327,8 +328,9 @@ function updateEngineCylindersAnnotation(svg, data, selected, x, y) {
         .attr("y", y(d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)))
         .attr("width", 40)
         .attr("height", y(80) - y(d3.max(zeroCylinderCars, d => selected === "city" ? d.AverageCityMPG : d.AverageHighwayMPG)))
-        .attr("fill", "lightgreen")
-        .attr("opacity", 0.1)
+        .attr("fill", "none")
+        .attr("stroke", "green")
+        .attr("stroke-width", 1)
         .attr("pointer-events", "none");
 
     svg.append("text")
