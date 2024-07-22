@@ -511,8 +511,10 @@ function updateFuelTypeScene(data, selected) {
     svg.select("text.title")
         .text(`Fuel Type vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
 
-    // Update annotation for the third bar
+    // Remove existing annotations
     svg.selectAll(".annotation").remove();
+
+    // Update annotation for the third bar
     annotateBar(svg, x, y, fuelData[2], selected, 600);
 }
 
