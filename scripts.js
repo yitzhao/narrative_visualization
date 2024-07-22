@@ -346,7 +346,6 @@ function updateEngineCylindersAnnotation(svg, data, selected, x, y) {
         .text(`Car makes include ${carMakes}.`);
 }
 
-
 function createFuelTypeScene(data) {
     d3.select("#viz").html("");
     d3.selectAll(".controls").style("display", "none");
@@ -455,33 +454,8 @@ function createFuelTypeScene(data) {
         updateFuelTypeScene(data, selected);
     });
 
-    // Annotation for the third bar
-    const thirdBar = fuelData[2];
-    const carMakesList = thirdBar.value.carMakes.join(", ");
-    svg.append("rect")
-        .attr("x", x(thirdBar.key) - 10)
-        .attr("y", y(thirdBar.value.AverageCityMPG))
-        .attr("width", x.bandwidth() + 20)
-        .attr("height", svgHeight - 50 - y(thirdBar.value.AverageCityMPG))
-        .attr("fill", "none")
-        .attr("stroke", "red")
-        .attr("stroke-width", 1);
-
-    svg.append("text")
-        .attr("x", x(thirdBar.key) + x.bandwidth() / 2)
-        .attr("y", y(thirdBar.value.AverageCityMPG) + (svgHeight - 50 - y(thirdBar.value.AverageCityMPG)) / 2)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text(`Electric cars are the most fuel-efficient, with`);
-    
-    svg.append("text")
-        .attr("x", x(thirdBar.key) + x.bandwidth() / 2)
-        .attr("y", y(thirdBar.value.AverageCityMPG) + (svgHeight - 50 - y(thirdBar.value.AverageCityMPG)) / 2 + 20)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
-        .style("font-weight", "bold")
-        .text(`car makes: ${carMakesList}`);
+    // Initial annotation for the third bar
+    annotateBar(svg, x, y, fuelData[2], "city", svgHeight);
 }
 
 function updateFuelTypeScene(data, selected) {
@@ -500,14 +474,14 @@ function updateFuelTypeScene(data, selected) {
     // Sort data by the selected MPG type
     fuelData.sort((a, b) => selected === "city" ? a.value.AverageCityMPG - b.value.AverageCityMPG : a.value.AverageHighwayMPG - b.value.AverageHighwayMPG);
 
+    const x = d3.scaleBand()
+        .domain(fuelData.map(d => d.key))
+        .range([50, 750])
+        .padding(0.2);  // Increased padding for narrower bars
+
     const y = d3.scaleLinear()
         .domain([0, d3.max(fuelData, d => selected === "city" ? d.value.AverageCityMPG : d.value.AverageHighwayMPG)])
         .range([550, 50]);
-
-    const x = d3.scaleBand()
-        .domain(fuelData.map(d => d.key))
-        .range([50, 1150])
-        .padding(0.2);  // Increased padding for narrower bars
 
     const yAxis = d3.axisLeft(y);
     const xAxis = d3.axisBottom(x);
@@ -534,38 +508,44 @@ function updateFuelTypeScene(data, selected) {
         .text(`Fuel Type vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
 
     // Update annotation for the third bar
-    const thirdBar = fuelData[2];
-    const carMakesList = thirdBar.value.carMakes.join(", ");
+    svg.selectAll(".annotation").remove();
+    annotateBar(svg, x, y, fuelData[2], selected, 600);
+}
+
+function annotateBar(svg, x, y, barData, selected, svgHeight) {
+    const carMakesList = barData.value.carMakes.join(", ");
 
     svg.append("rect")
         .attr("class", "annotation")
-        .attr("x", x(thirdBar.key) - 10)
-        .attr("y", y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG))
+        .attr("x", x(barData.key) - 10)
+        .attr("y", y(selected === "city" ? barData.value.AverageCityMPG : barData.value.AverageHighwayMPG))
         .attr("width", x.bandwidth() + 20)
-        .attr("height", 550 - y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG))
+        .attr("height", svgHeight - 50 - y(selected === "city" ? barData.value.AverageCityMPG : barData.value.AverageHighwayMPG))
         .attr("fill", "none")
         .attr("stroke", "red")
         .attr("stroke-width", 1);
-    
-    svg.selectAll("text.annotation").remove();
+
+    const annotationY = y(selected === "city" ? barData.value.AverageCityMPG : barData.value.AverageHighwayMPG) + (svgHeight - 50 - y(selected === "city" ? barData.value.AverageCityMPG : barData.value.AverageHighwayMPG)) / 2;
+
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(thirdBar.key) + x.bandwidth() / 2)
-        .attr("y", y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG) + (550 - y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG)) / 2)
+        .attr("x", x(barData.key) + x.bandwidth() / 2)
+        .attr("y", annotationY)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
-        .text(`Electric cars are the most fuel-efficient, with`);
-    
+        .text("Electric cars are the most fuel-efficient, with");
+
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(thirdBar.key) + x.bandwidth() / 2)
-        .attr("y", y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG) + (550 - y(selected === "city" ? thirdBar.value.AverageCityMPG : thirdBar.value.AverageHighwayMPG)) / 2)
+        .attr("x", x(barData.key) + x.bandwidth() / 2)
+        .attr("y", annotationY + 20)
         .attr("text-anchor", "middle")
         .style("font-size", "14px")
         .style("font-weight", "bold")
         .text(`car makes: ${carMakesList}`);
 }
+
 
 function createMakeMPGScene(data) {
     d3.select("#viz").html("");
@@ -671,7 +651,7 @@ function createMakeMPGScene(data) {
         updateMakeMPGScene(data, selected);
     });
 
-    updateAnnotation(svg, sortedData, "city", numRightmostBars, 50, svgHeight, x);
+    updateMakeMPGAnnotation(svg, sortedData, "city", numRightmostBars, 50, svgHeight, x);
 }
 
 function updateMakeMPGScene(data, selected) {
@@ -724,10 +704,10 @@ function updateMakeMPGScene(data, selected) {
         .text(`Make vs ${selected === "city" ? "City MPG" : "Highway MPG"}`);
 
     // Update annotation for the rightmost bars
-    updateAnnotation(svg, sortedData, selected, numRightmostBars, 50, svgHeight, x);
+    updateMakeMPGAnnotation(svg, sortedData, selected, numRightmostBars, 50, svgHeight, x);
 }
 
-function updateAnnotation(svg, sortedData, mpgType, numRightmostBars, marginTop, svgHeight, x) {
+function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, marginTop, svgHeight, x) {
     svg.selectAll(".annotation").remove();
     const annotationStart = sortedData.length - numRightmostBars;
 
