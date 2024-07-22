@@ -730,7 +730,7 @@ function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, mar
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2 - 20)
+        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 20)
         .attr("y", marginTop + 40)
         .attr("text-anchor", "start")
         .style("font-size", "13px")
@@ -739,7 +739,7 @@ function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, mar
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2 - 20)
+        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 20)
         .attr("y", marginTop + 60)
         .attr("text-anchor", "start")
         .style("font-size", "13px")
@@ -748,7 +748,7 @@ function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, mar
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2 - 20)
+        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 20)
         .attr("y", marginTop + 80)
         .attr("text-anchor", "start")
         .style("font-size", "13px")
