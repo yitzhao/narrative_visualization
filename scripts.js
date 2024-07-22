@@ -730,7 +730,7 @@ function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, mar
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 70)
+        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 80)
         .attr("y", marginTop + 40)
         .attr("text-anchor", "start")
         .style("font-size", "13px")
@@ -739,19 +739,19 @@ function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, mar
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 70)
+        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 80)
         .attr("y", marginTop + 60)
         .attr("text-anchor", "start")
         .style("font-size", "13px")
         .style("font-weight", "bold")
-        .text(`with average ${mpgType} MPG both over 50.`);
+        .text(`with average ${mpgType} MPG both over 50. Include`);
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 70)
+        .attr("x", x(sortedData[annotationStart].key) - (x.bandwidth() * numRightmostBars) / 2 - 80)
         .attr("y", marginTop + 80)
         .attr("text-anchor", "start")
         .style("font-size", "13px")
         .style("font-weight", "bold")
-        .text("Include Tesla, Hyundai, Fiat, and Mitsubishi.");
+        .text("Tesla, Hyundai, Fiat, and Mitsubishi.");
 }
