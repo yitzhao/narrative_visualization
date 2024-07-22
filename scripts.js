@@ -528,7 +528,7 @@ function annotateBar(svg, x, y, barData, selected, svgHeight) {
         .attr("width", x.bandwidth() + 20)
         .attr("height", svgHeight - 50 - y(selected === "city" ? barData.value.AverageCityMPG : barData.value.AverageHighwayMPG))
         .attr("fill", "none")
-        .attr("stroke", "red")
+        .attr("stroke", "green")
         .attr("stroke-width", 1);
 
     const annotationY = y(selected === "city" ? barData.value.AverageCityMPG : barData.value.AverageHighwayMPG) + (svgHeight - 50 - y(selected === "city" ? barData.value.AverageCityMPG : barData.value.AverageHighwayMPG)) / 2;
@@ -720,37 +720,38 @@ function updateMakeMPGAnnotation(svg, sortedData, mpgType, numRightmostBars, mar
     svg.append("rect")
         .attr("class", "annotation")
         .attr("x", x(sortedData[annotationStart].key))
-        .attr("y", marginTop)
-        .attr("width", x.bandwidth() * numRightmostBars)
-        .attr("height", svgHeight - marginTop - 50)
-        .attr("fill", "lightgreen")
-        .attr("opacity", 0.1)
+        .attr("y", marginTop-20)
+        .attr("width", x.bandwidth() * numRightmostBars + 20)
+        .attr("height", svgHeight - marginTop)
+        .attr("fill", "none")
+        .attr("stroke", "green")
+        .attr("stroke-width", 1)
         .attr("pointer-events", "none");
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
-        .attr("y", marginTop + 20)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2 - 20)
+        .attr("y", marginTop + 40)
+        .attr("text-anchor", "start")
+        .style("font-size", "13px")
         .style("font-weight", "bold")
         .text("These are highly fuel-efficient car makes");
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
-        .attr("y", marginTop + 40)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2 - 20)
+        .attr("y", marginTop + 60)
+        .attr("text-anchor", "start")
+        .style("font-size", "13px")
         .style("font-weight", "bold")
         .text(`with average ${mpgType} MPG both over 50.`);
 
     svg.append("text")
         .attr("class", "annotation")
-        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2)
-        .attr("y", marginTop + 60)
-        .attr("text-anchor", "middle")
-        .style("font-size", "14px")
+        .attr("x", x(sortedData[annotationStart].key) + (x.bandwidth() * numRightmostBars) / 2 - 20)
+        .attr("y", marginTop + 80)
+        .attr("text-anchor", "start")
+        .style("font-size", "13px")
         .style("font-weight", "bold")
         .text("Car makes include Tesla, Hyundai, Fiat, and Mitsubishi.");
 }
